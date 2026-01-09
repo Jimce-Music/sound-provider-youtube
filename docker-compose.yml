@@ -1,0 +1,10 @@
+---
+services:
+  sound-provider-youtube:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sound-provider-youtube
+    restart: unless-stopped
+    ports:
+      - "4002:4002"
