@@ -1,34 +1,34 @@
-import { exec } from "child_process";
-import { promisify } from "util";
-import { tools } from "./tools";
+// Import the framework and instantiate it
+import Fastify from 'fastify'
+const fastify = Fastify({
+  logger: true
+})
 
-const execAsync = promisify(exec);
+// Declare a route
+fastify.get('/info', async function download () {
+    console.log("Request für /info erhalten");
+    return { hello: '/info' }
+})
 
-async function checkDependencies() {
-  let hasErrors = false;
+fastify.get('/request-play', async function download () {
+    console.log("Request für /request-play erhalten");
+    return { hello: '/request-play'}
+})
 
-  for (const tool of tools) {
-    try {
-      // checkCmd statt nur name verwenden
-      await execAsync(tool.checkCmd);
-      console.log(`${tool.name} ist installiert.`);
-    } catch {
-      console.error(`${tool.name} fehlt!`);
-      hasErrors = true;
-    }
-  }
+fastify.get('/stream', async function download () {
+    console.log("Request für /stream erhalten");
+    return { hello: '/stream' }
+})
 
-  if (hasErrors) {
-    console.error("\nAbhängigkeiten fehlen. Stelle sicher, dass sie:");
-    console.error("- im Dockerfile installiert sind ODER");
-    console.error("- lokal im PATH verfügbar sind");
-    process.exit(1);
-  }
+fastify.get('/download', async function download () {
+    console.log("Request für /download erhalten");
+    return { hello: '/download' }
+})
 
-  console.log("\nAlle Dependencies sind verfügbar.");
+// Run the server!
+try {
+  await fastify.listen({ port: 3000 })
+} catch (err) {
+  fastify.log.error(err)
+  process.exit(1)
 }
-
-checkDependencies().catch((err) => {
-  console.error("Fehler beim Prüfen der Dependencies:", err);
-  process.exit(1);
-});
