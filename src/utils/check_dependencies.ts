@@ -4,16 +4,16 @@ import { tools } from "./tools";
 
 const execAsync = promisify(exec);
 
-async function checkDependencies() {
+export async function checkDependencies() {
   let hasErrors = false;
 
   for (const tool of tools) {
     try {
       // checkCmd statt nur name verwenden
       await execAsync(tool.checkCmd);
-      console.log(`${tool.name} ist installiert.`);
+      console.log(`✔️ ${tool.name} ist installiert.`);
     } catch {
-      console.error(`${tool.name} fehlt!`);
+      console.error(`❌ ${tool.name} fehlt!`);
       hasErrors = true;
     }
   }
