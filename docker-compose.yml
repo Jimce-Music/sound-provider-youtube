@@ -5,8 +5,6 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: sound-provider-youtube
-    volumes:
-      - ./downloads:/app/downloads
     restart: unless-stopped
     ports:
-      - "4002:4002"
+      - "4002:3000"
