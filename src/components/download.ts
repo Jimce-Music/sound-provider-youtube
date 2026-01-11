@@ -10,6 +10,9 @@ const args = [
   "-x",
   "--audio-format", "m4a",
   "--audio-quality", "0",
+  "--embed-thumbnail",
+  "--convert-thumbnails", "jpg",
+  "--add-metadata",
   "--progress",
   "-o", "%(title)s.%(ext)s",
   videoUrl
