@@ -12,15 +12,13 @@ export const tools: Tool[] = (() => {
     return [
       { name: "yt-dlp", checkCmd: "yt-dlp.exe --version" },
       { name: "ffmpeg", checkCmd: "ffmpeg.exe -version" },
-      { name: "ffprobe", checkCmd: "ffprobe.exe -version" },
-      { name: "AtomicParsley", checkCmd: "AtomicParsley.exe --version" }
+      { name: "ffprobe", checkCmd: "ffprobe.exe -version" }
     ];
   }
 
   return [
     { name: "yt-dlp", checkCmd: "yt-dlp --version" },
     { name: "ffmpeg", checkCmd: "ffmpeg -version" },
-    { name: "ffprobe", checkCmd: "ffprobe -version" },
-    { name: "AtomicParsley", checkCmd: "AtomicParsley --version" }
+    { name: "ffprobe", checkCmd: "ffprobe -version" }
   ];
 })();

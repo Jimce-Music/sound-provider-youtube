@@ -1,5 +1,6 @@
 // Import the framework and instantiate it
 import Fastify from 'fastify'
+
 const fastify = Fastify({
   logger: true
 })
@@ -36,9 +37,16 @@ fastify.get('/stream', async function download () {         // GET /stream?id=[u
   return { hello: '/stream' }
 })
 
-fastify.get('/download', async function download () {       // GET /download?id=[uuid]
-  console.log("Request für /download erhalten");
-  return { hello: '/download' }
+fastify.get('/download', async function download(request, reply) {       // GET /download?id=[uuid]
+  console.log("Request für /download erhalten")
+
+  const youtubeURL = request.query as {youtubeURL?: string}
+  if (!youtubeURL) {
+    return reply.status(400).send({ error: "Keine URL angegeben" });
+  }
+
+  console.log("YouTube-URL:", youtubeURL);
+  return { success: true, youtubeURL};
 })
 
 fastify.get('/api/ping', async function ping (req, res) {
