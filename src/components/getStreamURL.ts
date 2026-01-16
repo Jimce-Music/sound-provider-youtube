@@ -1,14 +1,15 @@
 import { spawn } from 'child_process'
 
-export default function streamYoutubeURL() {
+export default function streamYoutubeURL(videoURL:string) {
     return new Promise<string>((resolve, reject) => {
-        const videoUrl = process.argv[2]
-        if (!videoUrl) {
+        if (!videoURL) {
             console.error('Bitte eine YouTube-URL angeben!')
             process.exit(1)
+        } else {
+            console.log("[Getted Youtube Video URL]", videoURL)
         }
 
-        const args = ['-g', videoUrl, '-f', 'bestaudio']
+        const args = ['-g', videoURL, '-f', 'bestaudio']
 
         const yt = spawn('yt-dlp', args)
 

@@ -1,6 +1,9 @@
 // Import the framework and instantiate it
 import Fastify from 'fastify'
 import streamYoutubeURL from './components/getStreamURL'
+import requestPlay from './components/requestPlay'
+import { plays, type PlayT, type PlaysStoreT } from './utils/PlaysStore'
+import * as uuid from 'uuid'
 
 const fastify = Fastify({
     logger: true
@@ -15,9 +18,23 @@ fastify.get('/info', async (req, res) => {
 
 fastify.get('/request-play', async (req, res) => {
     // GET /request-play?identifier=dQw4w9WgXcQ&just-download=false&save-while-streaming=true&downloaded-callback=http://jimce-server:8080/api/downlaoded-callback/67as0fhufuiashiu
-    console.log(req.query) // JSON --> {identifier: '...', 'just-download': false, ...}
+    const query = req.query as { identifier?: string }
+    if (!query.identifier) return res.status(400).send('No identifier provided')
+    const youtubeId: string = typeof query.identifier === 'string' ? query.identifier : ''
+    if (youtubeId.length <= 3) return res.status(400).send('No identifier provided')
+
+    console.log('Request für /request-play erhalten')
+
+    const playId = uuid.v4()
+    plays[playId] = {
+        uuid: playId,
+        created: new Date(),
+        youtubeId: youtubeId
+    }
+
     res.status(200).send({
-        // JSON here
+        success:true,
+        uuid:playId
     })
 })
 
@@ -30,10 +47,11 @@ fastify.get('/stream', async (req, res) => {
 
     console.log('Request für /stream erhalten')
     console.log(`id: ${streamId}`) // not the yt id, internal uuid
-    await streamYoutubeURL()
+    const videoURL = ("https://www.youtube.com/watch?v=6EF64kAgtF4")
+    const url = await streamYoutubeURL(videoURL)
 
     res.status(200).send({
-        // JSON here
+      url:url
     })
 })
 
