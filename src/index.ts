@@ -7,40 +7,56 @@ const fastify = Fastify({
 })
 
 // Declare a route
-fastify.get('/info', async function download() {
-    // /info
-    console.log('Request für /info erhalten')
+fastify.get('/info', async (req, res) => {
+    res.status(200).send({
+        // JSON here
+    })
 })
 
-fastify.get('/request-play', async function download() {
+fastify.get('/request-play', async (req, res) => {
     // GET /request-play?identifier=dQw4w9WgXcQ&just-download=false&save-while-streaming=true&downloaded-callback=http://jimce-server:8080/api/downlaoded-callback/67as0fhufuiashiu
-    console.log('Request für /request-play erhalten')
+    console.log(req.query) // JSON --> {identifier: '...', 'just-download': false, ...}
+    res.status(200).send({
+        // JSON here
+    })
 })
 
-fastify.get('/stream', async function download() {
+fastify.get('/stream', async (req, res) => {
     // GET /stream?id=[uuid]
+    const query = req.query as { id?: string }
+    if (!query.id) return res.status(400).send('No uuid provided')
+    const streamId: string = typeof query.id === 'string' ? query.id : ''
+    if (streamId.length <= 3) return res.status(400).send('No uuid provided')
+
     console.log('Request für /stream erhalten')
+    console.log(`id: ${streamId}`) // not the yt id, internal uuid
     await streamYoutubeURL()
+
+    res.status(200).send({
+        // JSON here
+    })
 })
 
-fastify.get('/download', async function download(request, reply) {
-    // GET /download?id=[uuid]
+fastify.get('/download', async (req, res) => {
+    // GET /stream?id=[uuid]
+    const query = req.query as { id?: string }
+    if (!query.id) return res.status(400).send('No uuid provided')
+    const dlId: string = typeof query.id === 'string' ? query.id : ''
+    if (dlId.length <= 3) return res.status(400).send('No uuid provided')
+
     console.log('Request für /download erhalten')
+    console.log(`id: ${dlId}`) // not the yt id, internal uuid
 
-    const youtubeURL = request.query as { youtubeURL?: string }
-    if (!youtubeURL) {
-        return reply.status(400).send({ error: 'Keine URL angegeben' })
-    }
-
-    console.log('YouTube-URL:', youtubeURL)
-    return { success: true, youtubeURL }
+    res.status(200).send({
+        // JSON here
+    })
 })
 
 fastify.get('/api/ping', async function ping(req, res) {
     res.status(200).send('pong')
 })
 
-// Run the server!
+// Run the server
 try {
     await fastify.listen({ port: 4002 })
 } catch (err) {
