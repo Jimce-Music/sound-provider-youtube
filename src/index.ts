@@ -1,5 +1,6 @@
 // Import the framework and instantiate it
 import Fastify from 'fastify'
+import fastifyCors from '@fastify/cors'
 import getStreamYoutubeURL from './components/getStreamURL'
 import requestPlay from './components/requestPlay'
 import { plays, type PlayT, type PlaysStoreT } from './utils/PlaysStore'
@@ -8,6 +9,11 @@ import downloadYoutubeAudio from './components/download'
 
 const fastify = Fastify({
     logger: true
+})
+
+// Set up CORS in dev mode
+await fastify.register(fastifyCors, {
+    origin: "*"
 })
 
 // Declare a route
