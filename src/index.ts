@@ -1,9 +1,10 @@
 // Import the framework and instantiate it
 import Fastify from 'fastify'
-import streamYoutubeURL from './components/getStreamURL'
+import getStreamYoutubeURL from './components/getStreamURL'
 import requestPlay from './components/requestPlay'
 import { plays, type PlayT, type PlaysStoreT } from './utils/PlaysStore'
 import * as uuid from 'uuid'
+import downloadYoutubeAudio from './components/download'
 
 const fastify = Fastify({
     logger: true
@@ -25,16 +26,35 @@ fastify.get('/request-play', async (req, res) => {
 
     console.log('Request für /request-play erhalten')
 
+    const existingPlay = Object.values(plays).find(
+        play => play.youtubeId === youtubeId
+    )
+
+    if (existingPlay) {
+        //Restore Job
+        return res.status(200).send({
+            success: true,
+            uuid: existingPlay.uuid,
+            created: existingPlay.created,
+            youtubeId: existingPlay.youtubeId,
+            downloadedCallback: existingPlay.downloadedCallback
+        })
+    }
+
     const playId = uuid.v4()
     plays[playId] = {
         uuid: playId,
         created: new Date(),
-        youtubeId: youtubeId
+        youtubeId: youtubeId,
+        downloadedCallback: await getStreamYoutubeURL(youtubeId)
     }
 
     res.status(200).send({
         success:true,
-        uuid:playId
+        uuid:playId,
+        created: plays[playId].created,
+        youtubeId: plays[playId].youtubeId,
+        downloadedCallback:plays[playId].downloadedCallback
     })
 })
 
@@ -48,7 +68,7 @@ fastify.get('/stream', async (req, res) => {
     console.log('Request für /stream erhalten')
     console.log(`id: ${streamId}`) // not the yt id, internal uuid
     const videoURL = ("https://www.youtube.com/watch?v=6EF64kAgtF4")
-    const url = await streamYoutubeURL(videoURL)
+    const url = await getStreamYoutubeURL(videoURL)
 
     res.status(200).send({
       url:url

@@ -1,6 +1,6 @@
 import { spawn } from 'child_process'
 
-export default function streamYoutubeURL(videoURL:string) {
+export default function getStreamYoutubeURL(videoURL:string) {
     return new Promise<string>((resolve, reject) => {
         if (!videoURL) {
             console.error('Bitte eine YouTube-URL angeben!')
