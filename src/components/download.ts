@@ -20,7 +20,7 @@ export default function downloadYoutubeAudio(youtubeDownloadUrl:string) {
       '--add-metadata',
       '--progress',
       '-o',
-      '%(title)s.%(ext)s',
+      './media/audio/%(title)s.%(ext)s',        // `./media/audio/${userId}%(title)s.%(ext)s`
       videoUrl
   ]
 

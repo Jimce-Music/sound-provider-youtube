@@ -7,7 +7,9 @@ services:
     container_name: sound-provider-youtube
     restart: unless-stopped
     ports:
-      - "4002:3000"
+      - "4002:4002"
+    volumes:
+      - ./media:/app/media
     networks:
       - app
 
