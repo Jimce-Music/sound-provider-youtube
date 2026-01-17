@@ -19,6 +19,8 @@ await fastify.register(fastifyCors, {
 
 // Declare a route
 fastify.get('/info', async (req, res) => {
+    console.log('[Main] Request für /info erhalten')
+
     res.status(200).send({
         // JSON here
     })
@@ -44,11 +46,11 @@ fastify.get('/request-play', async (req, res) => {
     const downloadedCallback = query['downloaded-callback']
 
 
-    console.log('Request für /request-play erhalten')
-    console.log('[Args][identifier]' + youtubeId)
-    console.log('[Args][just-download]' + justDownload)
-    console.log('[Args][save-while-streaming]' + saveWhileStreaming)
-    console.log('[Args][downloaded-callback]' + downloadedCallback)
+    console.log('[Main] Request für /request-play erhalten')
+    console.log('[Request-Play | Args | identifier]' + youtubeId)
+    console.log('[Request-Play | Args | just-download]' + justDownload)
+    console.log('[Request-Play | Args | save-while-streaming]' + saveWhileStreaming)
+    console.log('[Request-Play | Args | downloaded-callback]' + downloadedCallback)
 
     const existingPlay = Object.values(plays).find(
         play => play.youtubeId === youtubeId
@@ -83,15 +85,15 @@ fastify.get('/stream', async (req, res) => {
     const streamId: string = typeof query.id === 'string' ? query.id : ''
     if (streamId.length <= 3) return res.status(400).send('No uuid provided')
 
-    console.log('Request für /stream erhalten')
-    console.log(`id: ${streamId}`) // not the yt id, internal uuid
+    console.log('[Main] Request für /stream erhalten')
+    console.log(`[Stream | ID] ${streamId}`) // not the yt id, internal uuid
     
     const existingStreamJob = Object.values(plays).find(
         play => play.uuid === streamId
     )
 
     const youtubeStreamUrl = existingStreamJob?.downloadedCallback
-    console.log('[STREAMURL]' + youtubeStreamUrl)
+    console.log('[Stream | STREAM_URL]' + youtubeStreamUrl)
 
     res.status(200).send({
         success: true,
@@ -106,8 +108,15 @@ fastify.get('/download', async (req, res) => {
     const dlId: string = typeof query.id === 'string' ? query.id : ''
     if (dlId.length <= 3) return res.status(400).send('No uuid provided')
 
-    console.log('Request für /download erhalten')
-    console.log(`id: ${dlId}`) // not the yt id, internal uuid
+    console.log('[Main] Request für /download erhalten')
+    console.log(`[Download | UUID] ${dlId}`) // not the yt id, internal uuid
+
+    const existingDownloadJob = Object.values(plays).find(
+        play => play.uuid === dlId
+    )
+
+    const youtubeDownloadUrl = existingDownloadJob?.youtubeId
+    console.log('[Download | DOWNLOAD_URL]')
 
     res.status(200).send({
         // JSON here
@@ -115,6 +124,8 @@ fastify.get('/download', async (req, res) => {
 })
 
 fastify.get('/api/ping', async function ping(req, res) {
+    console.log('[Main] Request für /api/ping erhalten')
+
     res.status(200).send('pong')
 })
 
