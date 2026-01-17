@@ -6,6 +6,7 @@ import requestPlay from './components/requestPlay'
 import { plays, type PlayT, type PlaysStoreT } from './utils/PlaysStore'
 import * as uuid from 'uuid'
 import downloadYoutubeAudio from './components/download'
+import type { BarBarEqualsToken } from 'typescript'
 
 const fastify = Fastify({
     logger: true
@@ -25,12 +26,29 @@ fastify.get('/info', async (req, res) => {
 
 fastify.get('/request-play', async (req, res) => {
     // GET /request-play?identifier=dQw4w9WgXcQ&just-download=false&save-while-streaming=true&downloaded-callback=http://jimce-server:8080/api/downlaoded-callback/67as0fhufuiashiu
-    const query = req.query as { identifier?: string }
-    if (!query.identifier) return res.status(400).send('No identifier provided')
+    const query = req.query as {
+        identifier?: string
+        'just-download'?: string
+        'save-while-streaming'?: string
+        'downloaded-callback'?: string
+    }
+
+    if (!query.identifier || query.identifier.length <= 3) {
+        return res.status(400).send('No identifier provided')
+    }
+
     const youtubeId: string = typeof query.identifier === 'string' ? query.identifier : ''
     if (youtubeId.length <= 3) return res.status(400).send('No identifier provided')
+    const justDownload = query['just-download'] === 'true'
+    const saveWhileStreaming = query['save-while-streaming'] === 'true'
+    const downloadedCallback = query['downloaded-callback']
+
 
     console.log('Request für /request-play erhalten')
+    console.log('[Args][identifier]' + youtubeId)
+    console.log('[Args][just-download]' + justDownload)
+    console.log('[Args][save-while-streaming]' + saveWhileStreaming)
+    console.log('[Args][downloaded-callback]' + downloadedCallback)
 
     const existingPlay = Object.values(plays).find(
         play => play.youtubeId === youtubeId
@@ -40,10 +58,7 @@ fastify.get('/request-play', async (req, res) => {
         //Restore Job
         return res.status(200).send({
             success: true,
-            uuid: existingPlay.uuid,
-            created: existingPlay.created,
-            youtubeId: existingPlay.youtubeId,
-            downloadedCallback: existingPlay.downloadedCallback
+            uuid: existingPlay.uuid
         })
     }
 
@@ -57,10 +72,7 @@ fastify.get('/request-play', async (req, res) => {
 
     res.status(200).send({
         success:true,
-        uuid:playId,
-        created: plays[playId].created,
-        youtubeId: plays[playId].youtubeId,
-        downloadedCallback:plays[playId].downloadedCallback
+        uuid:playId
     })
 })
 
@@ -73,11 +85,17 @@ fastify.get('/stream', async (req, res) => {
 
     console.log('Request für /stream erhalten')
     console.log(`id: ${streamId}`) // not the yt id, internal uuid
-    const videoURL = ("https://www.youtube.com/watch?v=6EF64kAgtF4")
-    const url = await getStreamYoutubeURL(videoURL)
+    
+    const existingStreamJob = Object.values(plays).find(
+        play => play.uuid === streamId
+    )
+
+    const youtubeStreamUrl = existingStreamJob?.downloadedCallback
+    console.log('[STREAMURL]' + youtubeStreamUrl)
 
     res.status(200).send({
-      url:url
+        success: true,
+        downloadedCallback:youtubeStreamUrl
     })
 })
 
@@ -102,7 +120,7 @@ fastify.get('/api/ping', async function ping(req, res) {
 
 // Run the server
 try {
-    await fastify.listen({ port: 4002 })
+    await fastify.listen({ port: 4002, host: '0.0.0.0' })
 } catch (err) {
     fastify.log.error(err)
     process.exit(1)
