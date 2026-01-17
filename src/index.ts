@@ -22,7 +22,7 @@ fastify.get('/info', async (req, res) => {
     console.log('[Main] Request für /info erhalten')
 
     res.status(200).send({
-        // JSON here
+        success:true
     })
 })
 
@@ -116,10 +116,15 @@ fastify.get('/download', async (req, res) => {
     )
 
     const youtubeDownloadUrl = existingDownloadJob?.youtubeId
-    console.log('[Download | DOWNLOAD_URL]')
+    console.log(`[Download | DOWNLOAD_URL] ${youtubeDownloadUrl}`)
+
+    if(!youtubeDownloadUrl) {
+        console.error('[Download | DOWNLOAD_URL] !!! EMPTY !!!')
+    }
+    downloadYoutubeAudio(youtubeDownloadUrl ?? '')
 
     res.status(200).send({
-        // JSON here
+        success: true
     })
 })
 

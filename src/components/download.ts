@@ -1,7 +1,7 @@
 import { spawn } from 'child_process'
 
-export default function downloadYoutubeAudio() {
-  const videoUrl = process.argv[2]
+export default function downloadYoutubeAudio(youtubeDownloadUrl:string) {
+  const videoUrl = youtubeDownloadUrl
   
   if (!videoUrl) {
       console.error('Bitte eine YouTube-URL angeben!')
