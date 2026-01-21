@@ -22,7 +22,25 @@ fastify.get('/info', async (req, res) => {
     console.log('[Main] Request für /info erhalten')
 
     res.status(200).send({
-        success:true
+        "success":true,
+
+        "name":"jimce-music/sound-provider-youtube",
+        "license":"MIT",
+
+        "prvider-type":"youtube",
+        "expected-sound-qualitiy":"medium",
+
+        "best-for":{
+            "streaming":true, 
+            "downloads":false
+        },
+
+        "capabilities": {
+            "streaming":[true, "/stream"],
+            "downloads":[true, "/download"]
+        },
+
+        "accepted-identifiers":["youtube:id", "youtube:url"]
     })
 })
 
