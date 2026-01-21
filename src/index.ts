@@ -146,7 +146,7 @@ fastify.get('/download', async (req, res) => {
     })
 })
 
-fastify.get('/api/ping', async function ping(req, res) {
+fastify.get('/ping', async function ping(req, res) {
     console.log('[Main] Request für /api/ping erhalten')
 
     res.status(200).send('pong')
