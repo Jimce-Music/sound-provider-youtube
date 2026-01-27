@@ -2,11 +2,9 @@
 import Fastify from 'fastify'
 import fastifyCors from '@fastify/cors'
 import getStreamYoutubeURL from './components/getStreamURL'
-import requestPlay from './components/requestPlay'
 import { plays, type PlayT, type PlaysStoreT } from './utils/PlaysStore'
 import * as uuid from 'uuid'
 import downloadYoutubeAudio from './components/download'
-import type { BarBarEqualsToken } from 'typescript'
 
 const fastify = Fastify({
     logger: true
