@@ -1,45 +1,48 @@
 import { spawn } from 'child_process'
 
-export default function downloadYoutubeAudio(youtubeDownloadUrl:string) {
-  const videoUrl = youtubeDownloadUrl
-  
-  if (!videoUrl) {
-      console.error('Bitte eine YouTube-URL angeben!')
-      process.exit(1)
-  }
+export default function downloadYoutubeAudio(youtubeDownloadUrl: string) {
+    const videoUrl = youtubeDownloadUrl
 
-  const args = [
-      '-x',
-      '--audio-format',
-      'm4a',
-      '--audio-quality',
-      '0',
-      '--embed-thumbnail',
-      '--convert-thumbnails',
-      'jpg',
-      '--add-metadata',
-      '--progress',
-      '-o',
-      './media/audio/%(title)s.%(ext)s',        // `./media/audio/${userId}%(title)s.%(ext)s`
-      videoUrl
-  ]
+    if (!videoUrl) {
+        console.error('Bitte eine YouTube-URL angeben!')
+        process.exit(1)
+    }
 
-  const yt = spawn('yt-dlp', args)
+    const args = [
+        '-x',
+        '--audio-format',
+        'm4a',
+        '--audio-quality',
+        '0',
+        '--embed-thumbnail',
+        '--convert-thumbnails',
+        'jpg',
+        '--add-metadata',
+        '--progress',
+        '--js-runtimes',
+        'bun',
+        '--remote-components ejs:github',
+        '-o',
+        './media/audio/%(title)s.%(ext)s', // `./media/audio/${userId}%(title)s.%(ext)s`
+        videoUrl
+    ]
 
-  yt.stdout.on('data', (data) => {
-      const line = data.toString().trim()
-      if (line.includes('%')) {
-          process.stdout.write(`\r${line}`)
-      } else {
-          console.log(line)
-      }
-  })
+    const yt = spawn('yt-dlp', args)
 
-  yt.stderr.on('data', (data) => {
-      process.stderr.write(data.toString())
-  })
+    yt.stdout.on('data', (data) => {
+        const line = data.toString().trim()
+        if (line.includes('%')) {
+            process.stdout.write(`\r${line}`)
+        } else {
+            console.log(line)
+        }
+    })
 
-  yt.on('close', (code) => {
-      console.log(`\nDownload beendet (Exit-Code ${code})`)
-  })
+    yt.stderr.on('data', (data) => {
+        process.stderr.write(data.toString())
+    })
+
+    yt.on('close', (code) => {
+        console.log(`\nDownload beendet (Exit-Code ${code})`)
+    })
 }

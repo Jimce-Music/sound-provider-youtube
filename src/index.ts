@@ -2,11 +2,9 @@
 import Fastify from 'fastify'
 import fastifyCors from '@fastify/cors'
 import getStreamYoutubeURL from './components/getStreamURL'
-import requestPlay from './components/requestPlay'
 import { plays, type PlayT, type PlaysStoreT } from './utils/PlaysStore'
 import * as uuid from 'uuid'
 import downloadYoutubeAudio from './components/download'
-import type { BarBarEqualsToken } from 'typescript'
 
 const fastify = Fastify({
     logger: true
@@ -146,7 +144,7 @@ fastify.get('/download', async (req, res) => {
     })
 })
 
-fastify.get('/api/ping', async function ping(req, res) {
+fastify.get('/ping', async function ping(req, res) {
     console.log('[Main] Request für /api/ping erhalten')
 
     res.status(200).send('pong')
