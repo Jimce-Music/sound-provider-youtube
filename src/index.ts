@@ -5,6 +5,7 @@ import getStreamYoutubeURL from './components/getStreamURL'
 import { plays, type PlayT, type PlaysStoreT } from './utils/PlaysStore'
 import * as uuid from 'uuid'
 import downloadYoutubeAudio from './components/download'
+import { handleRequestPlay } from './components/requestPlayHandler'
 
 const fastify = Fastify({
     logger: true
@@ -43,54 +44,25 @@ fastify.get('/info', async (req, res) => {
 })
 
 fastify.get('/request-play', async (req, res) => {
-    // GET /request-play?identifier=dQw4w9WgXcQ&just-download=false&save-while-streaming=true&downloaded-callback=http://jimce-server:8080/api/downlaoded-callback/67as0fhufuiashiu
     const query = req.query as {
         identifier?: string
         'just-download'?: string
         'save-while-streaming'?: string
-        'downloaded-callback'?: string
     }
 
     if (!query.identifier || query.identifier.length <= 3) {
         return res.status(400).send('No identifier provided')
     }
 
-    const youtubeId: string = typeof query.identifier === 'string' ? query.identifier : ''
-    if (youtubeId.length <= 3) return res.status(400).send('No identifier provided')
-    const justDownload = query['just-download'] === 'true'
-    const saveWhileStreaming = query['save-while-streaming'] === 'true'
-    const downloadedCallback = query['downloaded-callback']
+    const result = await handleRequestPlay({
+        youtubeId: query.identifier,
+        justDownload: query['just-download'] === 'true',
+        saveWhileStreaming: query['save-while-streaming'] === 'true'
+    })
 
-
-    console.log('[Main] Request für /request-play erhalten')
-    console.log('[Request-Play | Args | identifier]' + youtubeId)
-    console.log('[Request-Play | Args | just-download]' + justDownload)
-    console.log('[Request-Play | Args | save-while-streaming]' + saveWhileStreaming)
-    console.log('[Request-Play | Args | downloaded-callback]' + downloadedCallback)
-
-    const existingPlay = Object.values(plays).find(
-        play => play.youtubeId === youtubeId
-    )
-
-    if (existingPlay) {
-        //Restore Job
-        return res.status(200).send({
-            success: true,
-            uuid: existingPlay.uuid
-        })
-    }
-
-    const playId = uuid.v4()
-    plays[playId] = {
-        uuid: playId,
-        created: new Date(),
-        youtubeId: youtubeId,
-        downloadedCallback: await getStreamYoutubeURL(youtubeId)
-    }
-
-    res.status(200).send({
-        success:true,
-        uuid:playId
+    return res.status(200).send({
+        success: true,
+        ...result
     })
 })
 

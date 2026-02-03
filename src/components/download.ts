@@ -1,6 +1,6 @@
 import { spawn } from 'child_process'
 
-export default function downloadYoutubeAudio(youtubeDownloadUrl: string) {
+export default async function downloadYoutubeAudio(youtubeDownloadUrl: string) {
     const videoUrl = youtubeDownloadUrl
 
     if (!videoUrl) {
@@ -21,7 +21,6 @@ export default function downloadYoutubeAudio(youtubeDownloadUrl: string) {
         '--progress',
         '--js-runtimes',
         'bun',
-        '--remote-components ejs:github',
         '-o',
         './media/audio/%(title)s.%(ext)s', // `./media/audio/${userId}%(title)s.%(ext)s`
         videoUrl
