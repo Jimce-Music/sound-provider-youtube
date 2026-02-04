@@ -2,6 +2,7 @@ import { plays } from '../utils/PlaysStore'
 import * as uuid from 'uuid'
 import getStreamYoutubeURL from './getStreamURL'
 import downloadYoutubeAudio from './download'
+import { stringWidth } from 'bun'
 
 type RequestPlayArgs = {
     youtubeId: string
@@ -72,7 +73,7 @@ export async function handleRequestPlay({
             try {
                 const url = await getStreamYoutubeURL(youtubeId)
                 if (plays[playId]) {
-                    plays[playId].downloadedCallback = url
+                    plays[playId].downloadedCallback = metadata.url
                 }
             } catch (err) {
                 console.error(err)
