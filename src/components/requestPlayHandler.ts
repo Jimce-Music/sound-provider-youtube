@@ -71,7 +71,7 @@ export async function handleRequestPlay({
 
         setImmediate(async () => {
             try {
-                const url = await getStreamYoutubeURL(youtubeId)
+                const metadata = await getStreamYoutubeURL(youtubeId)
                 if (plays[playId]) {
                     plays[playId].downloadedCallback = metadata.url
                 }
