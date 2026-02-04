@@ -39,7 +39,12 @@ export async function handleRequestPlay({
 
         return {
             uuid: existingPlay.uuid,
-            streamUrl: existingPlay.downloadedCallback
+            streamUrl: existingPlay.downloadedCallback,
+            // Metadata
+            title: existingPlay.meta?.title,
+            artist: existingPlay.meta?.artist,
+            thumbnail: existingPlay.meta?.thumbnail,
+            link: existingPlay.meta?.link
         }
     }
 
@@ -78,13 +83,20 @@ export async function handleRequestPlay({
     }
 
     // STREAM MODE
-    const streamUrl = await getStreamYoutubeURL(youtubeId)
+    const metadata = await getStreamYoutubeURL(youtubeId)
 
     plays[playId] = {
         uuid: playId,
         created: new Date(),
         youtubeId,
-        downloadedCallback: streamUrl
+        downloadedCallback: metadata.url,
+        // Save Metadata in PlayStore
+        meta: {
+            title: metadata.title,
+            artist: metadata.uploader,
+            thumbnail: metadata.thumbnail,
+            link: metadata.webpage_url
+        }
     }
 
     if (saveWhileStreaming) {
@@ -97,8 +109,15 @@ export async function handleRequestPlay({
         })
     }
 
+    console.log('[TEST]', metadata)
+
     return {
         uuid: playId,
-        streamUrl
+        streamUrl: metadata.url,
+        // Metadata
+        title: metadata.title,
+        artist: metadata.uploader,
+        thumbnail: metadata.thumbnail,
+        link: metadata.webpage_url
     }
 }
