@@ -24,6 +24,8 @@ export default function getStreamYoutubeURL(videoURL: string) {
             'bestaudio',
             '--js-runtimes',
             'bun',
+            '--cookies',
+            'cookies.txt'
             // '--no-simulate' // Manchmal notwendig, um sicherzustellen, dass echte Stream-URLs generiert werden
         ]
 

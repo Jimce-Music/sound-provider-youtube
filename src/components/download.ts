@@ -22,6 +22,8 @@ export default async function downloadYoutubeAudio(youtubeDownloadUrl: string) {
         '--js-runtimes',
         'bun',
         '-o',
+        '--cookies',
+        'cookies.txt',
         './media/audio/%(title)s.%(ext)s', // `./media/audio/${userId}%(title)s.%(ext)s`
         videoUrl
     ]
