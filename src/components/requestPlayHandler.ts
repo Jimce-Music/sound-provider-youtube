@@ -2,6 +2,7 @@ import { plays } from '../utils/PlaysStore'
 import * as uuid from 'uuid'
 import getStreamYoutubeURL from './getStreamURL'
 import downloadYoutubeAudio from './download'
+import { stringWidth } from 'bun'
 
 type RequestPlayArgs = {
     youtubeId: string
@@ -39,7 +40,12 @@ export async function handleRequestPlay({
 
         return {
             uuid: existingPlay.uuid,
-            streamUrl: existingPlay.downloadedCallback
+            streamUrl: existingPlay.downloadedCallback,
+            // Metadata
+            title: existingPlay.meta?.title,
+            artist: existingPlay.meta?.artist,
+            thumbnail: existingPlay.meta?.thumbnail,
+            link: existingPlay.meta?.link
         }
     }
 
@@ -65,9 +71,9 @@ export async function handleRequestPlay({
 
         setImmediate(async () => {
             try {
-                const url = await getStreamYoutubeURL(youtubeId)
+                const metadata = await getStreamYoutubeURL(youtubeId)
                 if (plays[playId]) {
-                    plays[playId].downloadedCallback = url
+                    plays[playId].downloadedCallback = metadata.url
                 }
             } catch (err) {
                 console.error(err)
@@ -78,13 +84,20 @@ export async function handleRequestPlay({
     }
 
     // STREAM MODE
-    const streamUrl = await getStreamYoutubeURL(youtubeId)
+    const metadata = await getStreamYoutubeURL(youtubeId)
 
     plays[playId] = {
         uuid: playId,
         created: new Date(),
         youtubeId,
-        downloadedCallback: streamUrl
+        downloadedCallback: metadata.url,
+        // Save Metadata in PlayStore
+        meta: {
+            title: metadata.title,
+            artist: metadata.uploader,
+            thumbnail: metadata.thumbnail,
+            link: metadata.webpage_url
+        }
     }
 
     if (saveWhileStreaming) {
@@ -97,8 +110,15 @@ export async function handleRequestPlay({
         })
     }
 
+    console.log('[TEST]', metadata)
+
     return {
         uuid: playId,
-        streamUrl
+        streamUrl: metadata.url,
+        // Metadata
+        title: metadata.title,
+        artist: metadata.uploader,
+        thumbnail: metadata.thumbnail,
+        link: metadata.webpage_url
     }
 }

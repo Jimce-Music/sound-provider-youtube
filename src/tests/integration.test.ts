@@ -9,15 +9,25 @@ let simulateError = false;
 mock.module('child_process', () => {
     return {
         spawn: () => {
+            // Wir erstellen ein Mock-Metadaten-Objekt, wie es yt-dlp --dump-json liefern würde
+            const mockMetadata = JSON.stringify({
+                url: 'https://googlevideo.com/test',
+                title: 'Mock Video Title',
+                uploader: 'Mock Artist',
+                thumbnail: 'https://mock-thumbnail.jpg',
+                webpage_url: 'https://youtube.com/watch?v=test'
+            });
+
             return {
                 stdout: { on: (event: string, cb: Function) => {
-                    if (!simulateError && event === 'data') cb(Buffer.from('googlevideo.com/test'));
+                    // WICHTIG: Hier schicken wir jetzt das JSON statt nur die URL
+                    if (!simulateError && event === 'data') cb(Buffer.from(mockMetadata));
                 }},
                 stderr: { on: (event: string, cb: Function) => {
                     if (simulateError && event === 'data') cb(Buffer.from('YouTube Error: Video unavailable'));
                 }},
                 on: (event: string, cb: Function) => {
-                    if (event === 'close') cb(simulateError ? 1 : 0); // 1 = Fehler, 0 = Erfolg
+                    if (event === 'close') cb(simulateError ? 1 : 0);
                 }
             }
         }
@@ -28,14 +38,15 @@ describe('Server Integration Tests', () => {
     let app: any;
 
     beforeAll(async () => {
-        // Logger ausschalten für Tests
         app = await buildApp({ logger: false }) 
         await app.ready()
     })
 
     beforeEach(() => {
-    // Leert das Objekt, ohne die Referenz zu zerstören
+        // Leert den Store
         for (const prop in plays) { delete plays[prop]; }
+        // Reset Error State für jeden Test
+        simulateError = false; 
     });
 
     afterAll(async () => {
@@ -71,7 +82,7 @@ describe('Server Integration Tests', () => {
             expect(response.statusCode).toBe(400)
         })
 
-        it('GET /request-play (mocked) should return uuid', async () => {
+        it('GET /request-play (mocked) should return uuid and metadata', async () => {
             const response = await app.inject({
                 method: 'GET',
                 url: '/request-play?identifier=dQw4w9WgXcQ'
@@ -81,18 +92,18 @@ describe('Server Integration Tests', () => {
             expect(response.statusCode).toBe(200)
             expect(json.success).toBe(true)
             expect(json.uuid).toBeDefined()
-            expect(json.streamUrl).toBeDefined() // Da unser Mock eine URL zurückgibt
+            // Hier prüfen wir jetzt auf die neuen Metadaten
+            expect(json.streamUrl).toBe('https://googlevideo.com/test')
+            expect(json.title).toBe('Mock Video Title')
         })
 
         it('GET /stream should return stream url for valid UUID', async () => {
-            // Erst eine Play-Request machen, um eine UUID zu bekommen
             const playRes = await app.inject({
                 method: 'GET',
                 url: '/request-play?identifier=dQw4w9WgXcQ'
             })
             const uuid = playRes.json().uuid
 
-            // Dann Stream anfragen
             const response = await app.inject({
                 method: 'GET',
                 url: `/stream?id=${uuid}`
@@ -101,7 +112,6 @@ describe('Server Integration Tests', () => {
             const json = response.json()
             expect(response.statusCode).toBe(200)
             expect(json.success).toBe(true)
-            // Checken ob der Mock-Wert zurückkommt
             expect(json.downloadedCallback).toContain('googlevideo.com')
         })
 
@@ -194,7 +204,7 @@ describe('Server Integration Tests', () => {
             });
             const uuid = response.json().uuid;
 
-            // Wir warten 100ms, damit setImmediate/Promise Zeit haben
+            // Zeit lassen für den asynchronen Hintergrund-Task
             await new Promise(resolve => setTimeout(resolve, 100));
 
             const streamRes = await app.inject({
@@ -202,8 +212,7 @@ describe('Server Integration Tests', () => {
                 url: `/stream?id=${uuid}`
             });
             
-            // Jetzt sollte die URL da sein, auch wenn sie asynchron geholt wurde
-            expect(streamRes.json().downloadedCallback).toBeDefined();
+            expect(streamRes.json().downloadedCallback).toBe('https://googlevideo.com/test');
         });
     })
 
